@@ -1,6 +1,0 @@
-# Files exceeding Cloudflare Pages 25 MiB per-file limit
-data/geojson/parcels.json
-data/geojson/address.json
-data/shp/Electric_Power_Transmission_Lines.zip
-data/topojson/zip-code-level-2017-topojson.json
-data/topojson/cb_2018_us_zcta510_500k.json

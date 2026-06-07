@@ -23,11 +23,15 @@ NodeAzure is a demo application built with Node.js and Express that provides an 
 - **File Handling:** Express-fileupload, Multer
 - **Environment Config:** dotenv
 - **UI Components:** Popper.js for positioning
+- **Deployment:** Cloudflare Pages (via Wrangler)
 
 ## Prerequisites
 
 - Node.js v10.15.3+
 - npm or yarn package manager
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/) (`npm install -g wrangler`)
+- A Cloudflare account
+- An Azure Maps subscription key
 
 ## Installation
 
@@ -42,30 +46,86 @@ cd NodeAzure
 npm install
 ```
 
-3. Set up environment variables:
-Create a `.env` file in the root directory with your Azure Maps configuration:
+3. Set up environment variables by creating a `.env` file in the root directory:
 ```env
-# Add your configuration here
+AZURE_MAPS_KEY=your_azure_maps_subscription_key
 ```
 
-## Getting Started
+## Running Locally
 
-Start the development server:
+Start the Express development server:
 
 ```bash
 npm start
 ```
 
-The application will run on `http://localhost:3000` (or your configured port).
+The application will run on `http://localhost:8080`.
 
-## Available Scripts
+The server reads `AZURE_MAPS_KEY` from `.env` and serves it to the frontend via `/config.js` so the key never appears in source code.
 
-- `npm start` - Start the Node.js server
+## Deploying to Cloudflare Pages
+
+### First-time setup
+
+Authenticate with Cloudflare:
+```bash
+npx wrangler login
+```
+
+### Build
+
+The build step copies `app/public` to `dist` and removes data files that exceed Cloudflare's 25 MiB per-file limit:
+
+```bash
+npm run build
+```
+
+### Deploy
+
+```bash
+npx wrangler pages deploy dist
+```
+
+### Windows one-liner (build + deploy)
+
+```cmd
+deploy.bat
+```
+
+### Cloudflare Git integration build config
+
+If deploying via Cloudflare's automatic Git integration, set the following in the Pages dashboard under **Settings → Builds & deployments**:
+
+| Field | Value |
+|---|---|
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler pages deploy dist` |
+| Root directory | `/` |
 
 ## Project Structure
 
-- `server.js` - Main application entry point
-- `package.json` - Project dependencies and configuration
+```
+NodeAzure/
+├── app/
+│   └── public/          # Static frontend assets (HTML, CSS, JS, data)
+│       ├── index.html
+│       ├── css/
+│       ├── js/
+│       └── data/
+├── app/routing/         # Express route definitions
+├── dist/                # Build output (generated, not committed)
+├── server.js            # Express server (local dev)
+├── worker.js            # Cloudflare Worker (production)
+├── wrangler.toml        # Wrangler configuration
+├── build.sh             # Build script (populates dist/)
+├── deploy.bat           # Windows build + deploy script
+└── .env                 # Local secrets (not committed)
+```
+
+## Available Scripts
+
+- `npm start` — Start the local Express server
+- `npm run build` — Build `dist/` from `app/public/`
 
 ## Dependencies
 
