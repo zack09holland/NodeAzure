@@ -1,0 +1,7 @@
+name = "node-azure"
+compatibility_date = "2026-06-07"
+type = "javascript"
+
+[site]
+bucket = "./app/public"
+entry-point = "workers-site"
