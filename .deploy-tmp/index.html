@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Azure Map Demo</title>
+
+  <!-- Load JQuery Files-->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <!-- Bootstrap -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
+    integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous">
+  </script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/> -->
+
+
+  <!-- Add references to the Azure Maps Map control JavaScript and CSS files. -->
+  <link rel="stylesheet" href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/2/atlas.min.css" type="text/css" />
+  <script src="https://atlas.microsoft.com/sdk/javascript/mapcontrol/2/atlas.min.js"></script>
+
+  <!-- Add a reference to the Azure Maps Services Module JavaScript file. -->
+  <script src="https://atlas.microsoft.com/sdk/javascript/service/2/atlas-service.min.js"></script>
+
+  <!-- Add references to the Azure Maps Map Drawing Tools JavaScript and CSS files. -->
+  <link rel="stylesheet" href="https://atlas.microsoft.com/sdk/javascript/drawing/0/atlas-drawing.min.css"
+    type="text/css" />
+  <script src="https://atlas.microsoft.com/sdk/javascript/drawing/0/atlas-drawing.min.js"></script>
+
+  <!-- Add references to the Azure Maps Map Spatial IO module. -->
+  <script src="https://atlas.microsoft.com/sdk/javascript/spatial/0/atlas-spatial.js"></script>
+
+  <!-- Local stylesheet -->
+  <link rel="stylesheet" href="css/style.css" type="text/css" />
+
+  <!-- Font Awesome Glyphicons -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+  <!-- Font Awesome -->
+  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'
+    type='text/css' media='all' />
+
+  <!-- Load in Shapefile-js library which converts Shapefiles into GeoJSON data. -->
+  <script src="data/scripts/shp.min.js"></script>
+  <script src="data/scripts/FileSaver.js"></script>
+
+  <!-- Load turf.js a spatial math library. https://turfjs.org/ -->
+  <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+
+  <!-- Load in Catiline.js library which makes it easier to work with web workers. -->
+  <script src="data/scripts/catiline.min.js"></script>
+
+</head>
+
+<body onload="GetMap()">
+  <!-- Content Container -->
+  <div class="row ">
+    <div class="" id="headerDiv">
+      <img id="headerLogo" src="./images/headerLogo.png" alt="Guy Carpenter">
+    </div>
+  </div>
+   
+  <div style="text-align: left;"><div id="progress"></div></div>
+
+    <!-- Map Container -->
+    <div class="row">
+      <div id="leftbox">
+        <div class="panel-group" id="accordion">
+
+<!-- LAYERS MAP STUFF -->
+          <div class="card bmcard">
+          <!-- First Panel -->
+            <div class="card-header bmcard-header" id="headingOne">
+              <div class="bmpanel panel-default">
+                <div class="panel-heading bmpanel-heading">
+                  <h5 class="panel-title" data-toggle="collapse" data-target="#collapseOne">
+                    Search                  
+                  </h5>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse">
+                  <div class="panel-body">
+                    <div class="ui-widget">
+                      <input id="queryTbx" placeholder="Search address">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <div class="card bmcard">
+            <div class="card-header bmcard-header" id="headingTwo">
+              <div class="bmpanel panel-default">
+                <div class="panel-heading bmpanel-heading">
+                  <h5 class="panel-title" data-toggle="collapse" data-target="#collapseTwo">
+                    Data Layers                  
+                  </h5>
+                </div>
+              </div>
+
+            </div>
+            <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+              <!-- Treeview Component -->
+              <div class="treeview"  data-ui-css-component="treeview">
+                <ul>
+<!-- Choropleth Layer Selection -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="choroplethItems" />
+                    <label class="bmlabel" for="choroplethItems">Thematic</label>
+                    <ul>
+                      <!-- Choropleth Info -->
+                      <!-- State Data -->
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="simpleChoropleth" />
+                        <label class="bmlabel" for="simpleChoropleth">State</label>
+                        <div class="choroplethInfo" style="display: none;">
+                          <div id="legend">
+                            <p>However over the states to get a popup with more information</p>
+                            <p>Population Density (people/mi<sup>2</sup>)</p>
+                          </div>
+                        </div>
+                      </li>
+                      <!-- Thematic by County -->
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="countyChoropleth" />
+                        <label class="bmlabel" for="countyChoropleth">County</label>
+                        <div class="countyChoroplethInfo" style="display: none;">
+                            <div class="countyLegend">
+                              <br>
+                              <p>
+                                This sample shows the estimated % population change between 2000 and 2010 of each US county relative
+                                to the 2000 census population data. This sample uses two data files; a GeoJSON file that contains the US county boundary data, and a CSV file that contains the population
+                                data. This sample cross references the population data and adds it as properties of the county boundary.
+                              </p>
+                              <br />
+                            </div>                            
+                          
+                        </div>
+                      </li>                 
+
+                    </ul>
+                  </li>
+<!-- Heat Map Layer Selection -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="heatMapItems" />
+                    <label class="bmlabel" for="heatMapItems">Heat Map</label>
+                    <ul>
+                    <!-- Default Heat Map Info -->
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="runHMOptions" />
+                        <label class="bmlabel" for="runHMOptions">Default</label>
+                        <div class="hmOptions" style="display: none;">
+                          <div id="layerInfo">
+                              <p>
+                                This shows how the different options of the heat map layer affect rendering.
+                              </p>
+                              <br />
+                              <div class="tab">
+                                <button class="tablinks active" onclick="HMOptionsOpenTab(this, 'hmStyleOptions')">Base Options</button>
+                                <button class="tablinks" onclick="HMOptionsOpenTab(this, 'hmLayerOptions')">Layer Options</button>
+                                <button class="tablinks" onclick="HMOptionsOpenTab(this, 'hmCode')">Code</button>
+                              </div>
+
+                              <div id="hmStyleOptions" class="tabcontent" style="display:block;">
+                                <table>
+                                  <tr title="An integer specifying the minimum zoom level to render the layer at.">
+                                    <td>Min Zoom:</td>
+                                    <td>
+                                      <form oninput="minz.value=MinZoom.value">
+                                        <input type="range" id="hmMinZoom" value="0" min="0" max="24" step="1" oninput="updateHeatMapLayer()"
+                                          onchange="updateHeatMapLayer()" />
+                                        <output name="minz" for="hmMinZoom">0</output>
+                                      </form>
+                                    </td>
+                                  </tr>
+                                  <tr title="An integer specifying the maximum zoom level to render the layer at.">
+                                    <td>Max Zoom:</td>
+                                    <td>
+                                      <form oninput="maxz.value=MaxZoom.value">
+                                        <input type="range" id="hmMaxZoom" value="24" min="0" max="24" step="1" oninput="updateHeatMapLayer()"
+                                          onchange="updateHeatMapLayer()" />
+                                        <output name="maxz" for="hmMaxZoom">24</output>
+                                      </form>
+                                    </td>
+                                  </tr>
+                                  <tr title="Specifies if the layer is visible or not.">
+                                    <td>Visible:</td>
+                                    <td><input id="Visible" type="checkbox" onclick="updateHeatMapLayer()" checked="checked" /></td>
+                                  </tr>
+                                </table>
+
+                                <p>
+                                  In addition to the options in this tool, the HeatMapLayer also has options for;
+                                  <ul>
+                                    <li>sourceLayer - used with VectorTileSource.</li>
+                                  </ul>
+                                  Many options in this layer also support Expressions which are not demonstrated in this sample.
+                                </p>
+                              </div>
+
+                              <div id="hmLayerOptions" class="tabcontent">
+                                <table>
+                                  <tr title="The color gradient expression to colorize the heat map.">
+                                    <td>Heat Gradient:</td>
+                                    <td>
+                                      <div class="dropdown">
+                                        <button id="gradientDropdownBtn" onclick="toggleGradientDropdown()" class="dropbtn"></button>
+                                        <div id="gradientDropdown" class="dropdown-content">
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  <tr
+                                    title="The radius in pixels used to render a data point on the heatmap. The radius must be a number greater or equal to 1.">
+                                    <td>Radius</td>
+                                    <td>
+                                      <form oninput="radius.value=Radius.value">
+                                        <input type="range" id="hmRadius" value="10" min="1" max="100" step="1" oninput="updateHeatMapLayer()"
+                                          onchange="updateHeatMapLayer()" />
+                                        <output name="radius" for="hmRadius">10</output>
+                                      </form>
+                                    </td>
+                                  </tr>
+                                  <tr title="The opacity at which the heatmap layer will be rendered defined as a number between 0 and 1.">
+                                    <td>Opacity</td>
+                                    <td>
+                                      <form oninput="opacity.value=Opacity.value">
+                                        <input type="range" id="hmOpacity" value="1" min="0" max="1" step="0.1" oninput="updateHeatMapLayer()"
+                                          onchange="updateHeatMapLayer()" />
+                                        <output name="opacity" for="hmOpacity">1</output>
+                                      </form>
+                                    </td>
+                                  </tr>
+                                  <tr
+                                    title="Similar to heatmap-weight but specifies the global heatmap intensity. The higher this value is, the more ‘weight’ each point will contribute to the appearance.">
+                                    <td>Intensity</td>
+                                    <td>
+                                      <form oninput="intensity.value=Intensity.value">
+                                        <input type="range" id="Intensity" value="1" min="0" max="5" step="0.02"
+                                          oninput="updateHeatMapLayer()" onchange="updateHeatMapLayer()" />
+                                        <output name="intensity" for="Intensity">1</output>
+                                      </form>
+                                    </td>
+                                  </tr>
+                                  <tr
+                                    title="Specifies how much an individual data point contributes to the heatmap. Must be a number greater than 0. A value of 5 would be equivalent to having 5 points of weight 1 in the same spot. This is useful when clustering points to allow heatmap rendering or large datasets.">
+                                    <td>Weight</td>
+                                    <td>
+                                      <input id="Weight" type="checkbox" onclick="updateHeatMapLayer()" /> base on "mag" property
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+
+                              <div id="hmCode" class="tabcontent">
+                                <textarea id="hmCodeOutput"></textarea><br /><br />
+                                <input id="RemoveDefaults" type="checkbox" onclick="updateHeatMapLayer()" checked="checked" /> Remove defaults
+                                <button class="copyBtn" data-clipboard-target="#CodeOutput">Copy to clipboard</button>
+                              </div>
+                          </div>
+                        </div>
+                      </li>                      
+                      <!-- Clustered Heat Map Info -->
+                      <!-- <li>
+                        <input class="treeviewChBx" type="checkbox" id="runClusteredHM" />
+                        <label class="bmlabel" for="runClusteredHM">Clustered</label>
+                        <div class="clusteredHM" style="display: none;">
+                          <div id="layerInfo">
+                            <p>When the cluster radius is small, the heat map will look nearly identical
+                              to a heat map using the unclustered data points but will perform much better.
+                              However, the smaller the cluster radius, the more accurate the heat map will
+                              be but with less of a performance benefit.
+                            </p>
+                          </div>
+                        </div>
+                      </li> -->
+                      
+                      <!-- Consistent Heat Map Info -->                      
+                      <!-- <li>
+                        <input class="treeviewChBx" type="checkbox" id="runConsistentHM" />
+                        <label class="bmlabel" for="runConsistentHM">Consistent</label>
+                        <div class="consistentHM" style="display: none;">
+                          <div id="layerInfo">
+                            <p> In this sample, the heat map will scale consistently between zoom levels 10 and 22.
+                              Each zoom level of the map has twice as many pixels vertically and horizontally as the
+                              previous zoom level,
+                              as such, scaling the radius such that it doubles with each zoom level will create a heat
+                              map that looks consistent on
+                              all zoom levels.
+                            </p>
+                          </div>
+                        </div>
+                      </li> -->
+
+                      <!-- Weighted Heat Map Info -->
+                      <!-- <li>
+                        <input class="treeviewChBx" type="checkbox" id="runWeightedHM" />
+                        <label class="bmlabel" for="runWeightedHM">Weighted</label>
+                        <div class="weightedHM" style="display: none;">
+                          <div id="layerInfo">
+                            <p> This sample shows how to create a heat map which defines the intensity of each data
+                              point based on a property.
+                              In this case the "mag" property is used to specify the weight of each data point.
+                              Additionally ann expression has been added to the radius property so that it changes based
+                              on the zoom level of the map.
+                            </p>
+                          </div>
+                        </div>
+                      </li> -->
+                    </ul>
+                  </li>
+<!-- Clustered Selection -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="clusteredItems" />
+                    <label class="bmlabel" for="clusteredItems">Clustered</label>
+                    <ul>
+                      <!-- Point Clusters in Bubble Layer -->
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="pointClusterBubble" />
+                        <label class="bmlabel" for="pointClusterBubble">Sized by Data</label>
+                        <div class="pointClusterBubbleInfo" style="display: none;">
+                          <p>
+                            This sample shows how to enable point based clustering on a data source and render them
+                            differently from individual
+                            points on the map. Clustered points have four properties;
+                          </p>
+
+                          <ul class="pointClusterBubbleInfo">
+                            <li><strong>cluster</strong> - A boolean value indicating that it is a cluster.</li>
+                            <li><strong>cluster_id</strong> - A unique id for the cluster which can be used with the
+                              DataSource
+                              <i>getClusterExpansionZoom</i>, <i>getClusterChildren</i>, and <i>getClusterLeaves</i>
+                              functions.</li>
+                            <li><strong>point_count</strong> - The number of points the cluster contains.</li>
+                            <li><strong>point_count_abbreviated</strong> - A string that abbreviates the point_count
+                              value if it is long. (i.e. 4,000 becomes 4K)</li>
+                          </ul>
+                        </div>
+                      </li>
+
+                      <!-- Bubble Layer Info -->
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="bubbleOptions" />
+                        <label class="bmlabel" for="bubbleOptions">Bubble Layer Options</label>
+                        <div class="bubbleLayerInfo" id="bubbleHTML" style="display: none;">
+                          <p>
+                            This sample shows how the different options of the bubble layer affect rendering.
+                          </p>
+                          <br />
+
+                          <div class="tab">
+                            <button class="tablinks active" onclick="openTab(this, 'StyleOptions')">Base
+                              Options</button>
+                            <button class="tablinks" onclick="openTab(this, 'BubbleLayerOptions')">Bubble
+                              Options</button>
+                            <button class="tablinks" onclick="openTab(this, 'Code')">Code</button>
+                          </div>
+
+                          <div id="StyleOptions" class="tabcontent" style="display:block;">
+                            <table>
+                              <tr title="An integer specifying the minimum zoom level to render the layer at.">
+                                <td>Min Zoom:</td>
+                                <td>
+                                  <form oninput="minz.value=MinZoom.value">
+                                    <input type="range" id="MinZoom" value="0" min="0" max="24" step="1"
+                                      oninput="updateBubbleLayer()" onchange="updateBubbleLayer()" />
+                                    <output name="minz" for="MinZoom">0</output>
+                                  </form>
+                                </td>
+                              </tr>
+                              <tr title="An integer specifying the maximum zoom level to render the layer at.">
+                                <td>Max Zoom:</td>
+                                <td>
+                                  <form oninput="maxz.value=MaxZoom.value">
+                                    <input type="range" id="MaxZoom" value="24" min="0" max="24" step="1"
+                                      oninput="updateBubbleLayer()" onchange="updateBubbleLayer()" />
+                                    <output name="maxz" for="MaxZoom">24</output>
+                                  </form>
+                                </td>
+                              </tr>
+                            </table>
+                            <p>
+                              In addition to the options in this tool, the BubbleLayer also has options for;
+                              <ul class="bubbleLayerInfo">
+                                <li><strong>sourceLayer</strong> - used with VectorTileSource.</li>
+                                <li><strong>filter</strong> - used to filter data in layer.</li>
+                              </ul>
+                              <br>
+                              Many options in this layer also support Expressions which are not demonstrated in this
+                              sample.
+                            </p>
+                          </div>
+
+                          <div id="BubbleLayerOptions" class="tabcontent">
+                            <table>
+                              <tr title="The color to fill the circle symbol with.">
+                                <td>Color:</td>
+                                <td><input type="color" id="Color" value="#1A73AA" onchange="updateBubbleLayer()" />
+                                </td>
+                              </tr>
+                              <tr
+                                title="A number between 0 and 1 that indicates the opacity at which the circles will be drawn.">
+                                <td>Opacity</td>
+                                <td>
+                                  <form oninput="opacity.value=Opacity.value">
+                                    <input type="range" id="Opacity" value="1" min="0" max="1" step="0.1"
+                                      oninput="updateBubbleLayer()" onchange="updateBubbleLayer()" />
+                                    <output name="opacity" for="Opacity">1</output>
+                                  </form>
+                                </td>
+                              </tr>
+                              <tr title="The color of the circles' outlines.">
+                                <td>Stroke Color:</td>
+                                <td><input type="color" id="StrokeColor" value="#FFFFFF"
+                                    onchange="updateBubbleLayer()" /></td>
+                              </tr>
+                              <tr title="The radius of the circle in pixels.">
+                                <td>Radius</td>
+                                <td>
+                                  <form oninput="radius.value=Radius.value">
+                                    <input type="range" id="Radius" value="5" min="0" max="50" step="1"
+                                      oninput="updateBubbleLayer()" onchange="updateBubbleLayer()" />
+                                    <output name="radius" for="Radius">5</output>
+                                  </form>
+                                </td>
+                              </tr>
+                              <tr
+                                title="A number between 0 and 1 that indicates the opacity at which the circles' outlines will be drawn.">
+                                <td>Stroke Opacity</td>
+                                <td>
+                                  <form oninput="strokeOpacity.value=StrokeOpacity.value">
+                                    <input type="range" id="StrokeOpacity" value="1" min="0" max="1" step="0.1"
+                                      oninput="updateBubbleLayer()" onchange="updateBubbleLayer()" />
+                                    <output name="strokeOpacity" for="StrokeOpacity">1</output>
+                                  </form>
+                                </td>
+                              </tr>
+                              <tr title="The width of the circles" outlines in pixels.">
+                                <td>Stroke Width</td>
+                                <td>
+                                  <form oninput="strokeWidth.value=StrokeWidth.value">
+                                    <input type="range" id="StrokeWidth" value="2" min="0" max="10" step="1"
+                                      oninput="updateBubbleLayer()" onchange="updateBubbleLayer()" />
+                                    <output name="strokeWidth" for="StrokeWidth">2</output>
+                                  </form>
+                                </td>
+                              </tr>
+                              <tr
+                                title="The amount to blur the circles. A value of 1 blurs the circles such that only the center point if at full opacity.">
+                                <td>Blur</td>
+                                <td>
+                                  <form oninput="blur.value=Blur.value">
+                                    <input type="range" id="Blur" value="0" min="0" max="1" step="0.1"
+                                      oninput="updateBubbleLayer()" onchange="updateBubbleLayer()" />
+                                    <output name="blur" for="Blur">0</output>
+                                  </form>
+                                </td>
+                              </tr>
+                              <tr title="Specifies the orientation of circle when map is pitched.">
+                                <td>Pitch Alignment:</td>
+                                <td>
+                                  <select id="PitchAlignment" onchange="updateBubbleLayer()">
+                                    <option value="map">map</option>
+                                    <option value="viewport" selected="selected">viewport</option>
+                                  </select>
+                                </td>
+                              </tr>
+                            </table>
+                          </div>
+
+                          <div id="Code" class="tabcontent">
+                            <textarea id="CodeOutput"></textarea><br /><br />
+                            <input id="RemoveDefaults" type="checkbox" onclick="updateBubbleLayer()"
+                              checked="checked" /> Remove defaults
+                            <button class="copyBtn" data-clipboard-target="#CodeOutput">Copy to clipboard</button>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+
+<!-- Weather Layer Selection -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="weatherMapItems" />
+                    <label class="bmlabel" for="weatherMapItems">Weather Maps</label>
+                    <ul>
+                      <!-- Radar Weather -->
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="runRadarWeather" />
+                        <label class="bmlabel" for="runRadarWeather">Radar Weather</label>
+                        <!-- Weather Info -->
+                        <div class="radarWeatherMap" style="display: none;">
+                          <div id="layerInfo">
+                            <p>
+                              This sample shows how to add weather radar overlays to the map as a tile
+                              layer.
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                      <!-- Infared Weather -->
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="runInfaredWeather" />
+                        <label class="bmlabel" for="runInfaredWeather">Infared Weather</label>
+                        <!-- Weather Info -->
+                        <div class="infaredWeatherMap" style="display: none;">
+                          <div id="layerInfo">
+                            <p>
+                              This sample shows how to add weather infrared overlays to the map as a tile
+                              layer.
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+
+                    </ul>
+                  </li>
+<!-- Bubble Layer Selection -->
+                  <!-- <li>
+                    <input class="treeviewChBx" type="checkbox" id="bubbleItems" />
+                    <label class="bmlabel" for="bubbleItems">Bubble</label>
+                    <ul>
+
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="clusterBubbles" />
+                        <label class="bmlabel" for="clusterBubbles">Cluster Aggregates </label>
+                        <div class="clusterBubblesInfo" style="display: none;">
+                          <p>
+                            This sample shows how to define custom properties on clusters that are defined using
+                            data-driven style expresison calculation.
+                            These calculations aggregate values across all points contained within the cluster.
+                          </p>
+                        </div>
+                      </li>
+
+                    </ul>
+                  </li> -->
+                
+                </ul>
+                <!-- End Layer Selections -->
+              </div>
+            </div>
+          </div>
+<!-- SPATIAL IO MAP STUFF -->
+          <div class="card bmcard">
+            <div class="card-header bmcard-header" id="headingThree">
+              <div class="bmpanel panel-default">
+                <div class="panel-heading bmpanel-heading">
+                  <h5 class="panel-title" data-toggle="collapse" data-target="#collapseThree">
+                    Spatial Layers                  
+                  </h5>
+                </div>
+              </div>
+            </div>
+            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+              <!-- Treeview Component -->
+              <div class="treeview">
+                <ul>
+                  <!-- Geospatial Layer Selection -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="geospatialItems" />
+                    <label class="bmlabel" for="geospatialItems">Geospatial Files</label>
+                    <ul>
+                      <!-- Simple Spatial Data -->
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="simpleSpatial" />
+                        <label class="bmlabel" for="simpleSpatial">Simple Spatial Data</label>
+                        <div class="simpleSpatialInfo" style="display: none;">
+                          <p>The atlas.io.read function supports reading KML, KMZ, GPX, GeoRSS, GML, GeoJSON, CSV (with spatial columns)</p>                        
+                          <p>
+                            Here is a list of all the properties within a SpatialDataSet object.
+                          </p>
+                          <ul class="simpleSpatialInfo">
+                              <li><strong>bbox</strong> - Bounding box of all the data in the data set.</li>
+                              <li><strong>features</strong> - GeoJSON features within the data set.</li>
+                              <li><strong>groundOverlays</strong> - An array of image or OGC map layers that represent KML GroundOverlays.</li>
+                              <li><strong>properties</strong> - Property information provided at the document level of a spatial data set.</li>
+                              <li><strong>stats</strong> - Statistics about the content and processing time of a spatial data set.</li>
+                              <li><strong>icons</strong> - A set of icon URL's. Key = icon name, Value = URL.</li>
+                              <li><strong>type</strong> - The GeoJSON type; "FeatureCollection".</li>
+                          </ul>
+                        </div>
+                      </li>
+
+                      <!-- WFS service explorer -->
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="WFCExplorer" />
+                        <label class="bmlabel" for="WFCExplorer">WFS service explorer</label>
+                        <div class="WFCExplorerInfo" style="display: none;">
+                          <div class="legend">
+                            <p>
+                              This is a simple tool for exploring WFS services on Azure Maps.
+                            </p>                    
+                            WFS Service:<br /><select id="wfcservicesDD" onchange="loadWFCSelectedInput()"></select><br />
+                                        
+                            Service URL: <input type="text" id="wfcinputTbx" /><input type="button" value="Load" onclick="loadWFCUserInput()" />
+                    
+                            <!-- <input id="useProxyService" type="checkbox" onclick="proxyOptionChanged()" /> Use Proxy Service -->
+                            <br />
+                            <b>Max features:</b>
+                            <select id="maxFeatures" onchange="processQuery()">
+                                <option value="100">100</option>
+                                <option value="250">250</option>
+                                <option value="500" selected="selected">500</option>
+                                <option value="1000">1000</option>
+                                <option value="5000">5000</option>
+                                <option value="Max">Max</option>
+                            </select>
+                            <br />
+                            <b>Property types:</b><br />
+                            <select id="typeNames" onchange="processQuery()"></select>
+                            <br />
+                            <b>Status: </b><p id="status"></p>
+                            
+                          </div>
+                        </div>
+                      </li>
+
+                      <!-- OGC Spatial Data -->
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="ogcLayer" />
+                        <label class="bmlabel" for="ogcLayer">OGC Layer Data</label>
+                        <div class="ogcLayerInfo" style="display: none;">                         
+                          <p>
+                            Here is a list of all the properties within a SpatialDataSet object.
+                          </p>
+                          OGC Service:<br />
+
+                          <select id="servicesDD" onchange="loadSelectInput()"></select><br /><br />
+
+                          
+                          Service URL: <input type="text" id="inputTbx" /><input type="button" value="Load"
+                            onclick="loadUserInput()" /><br /><br />
+
+                          <!-- <input id="useProxyService" type="checkbox" /> Use Proxy Service<br /><br /> -->
+
+                          <input id="bringIntoView" type="checkbox" checked="checked" /> Bring into view<br /><br />
+
+                          <!-- <b>Sublayers</b><br /><br />
+
+                          <div id="layerPicker"></div> -->
+                        </div>
+                      </li>
+                      <!-- SHP Files -->
+                      <li>
+                        <input class="treeviewChBx" type="checkbox" id="shpFiles" />
+                        <label class="bmlabel" for="shpFiles">SHP Files</label>
+                        <div class="shpFileInfo" style="display: none;">                          
+
+                        </div>
+                        <ul>
+                          <!-- Small SHP Example - Chicago Bike Racks SHP File  -->
+                          <li>
+                            <input class="treeviewChBx" type="checkbox" id="smallSHP" />
+                            <label for="smallSHP">Small SHP File (322KB) </label>
+                            <div class="smallSHPInfo" style="display: none;">                          
+                                <p>
+                                  Chicago Bike Racks
+                                </p>
+                            </div>
+                          </li>
+                          <!-- Medium SHP Example - German Postal Codes (17MB) SHP File  -->
+                          <li>
+                            <input class="treeviewChBx" type="checkbox" id="medSHP" />
+                            <label class="bmlabel" for="medSHP">Medium SHP File (17MB) </label>
+                            <div class="medSHPInfo" style="display: none;">                          
+                              <p>
+                                German Postal Codes
+                              </p>                            
+                            </div>
+                          </li>                      
+                          <!-- Large SHP Example - US Electrical Transmission lines  (140MB) SHP File  -->
+                          <li>
+                            <input class="treeviewChBx" type="checkbox" id="largeSHP" />
+                            <label class="bmlabel" for="largeSHP">Large SHP File (140MB) </label>
+                            <div class="largeSHPInfo" style="display: none;">                          
+                              <p>
+                                US Electrical Transmission lines
+                              </p>                            
+                            </div>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+<!-- Personal Layers -->
+          <div class="card bmcard">
+            <div class="card-header bmcard-header" id="headingFour">
+              <div class="bmpanel panel-default">
+                <div class="panel-heading bmpanel-heading">
+                  <h5 class="panel-title" data-toggle="collapse" data-target="#collapseFour">
+                    Personal Layers                  
+                  </h5>
+                </div>
+              </div>
+            </div>
+            <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">  
+              <!-- Add File Button -->
+              <div id="dropdownMenuButton" class="">
+                <button class="btn btn-secondary btn-sm" type="button" data-toggle="modal" data-target="#uberModal"
+                onclick="createPreviewMap()">
+                  Add File/Layer
+                </button>
+              </div>
+
+              <div id="dropdownMenuButton" class="">
+                <!-- <button class="btn btn-secondary btn-sm" type="button" >
+                  Add Large File
+                </button> -->
+                <div class="col-12">
+                  <!-- Select File -->
+                 <input class="btn btn-sm btn-secondary" type="button" id="addLargeFileBtn" value="Add Large File">
+                 <form class="largefilesfrm" action="/upload" method="post" onsubmit="return submitLargeFilesForm(this);"
+                   style="display: none;">
+                   <input type="file" name="filesfld" class="largefilesfld" onchange="submitLargeFilesForm(this.form);"
+                     multiple />
+                   <label for="filesfld" class="fileslbl" ondragover="stopDefault(event);"
+                     ondragenter="stopDefault(event);" ondragleave="stopDefault(event);"
+                     ondrop="stopDefault(event);addLargeFilesAndSubmit(event);"></label>
+                 </form>
+               </div>
+              </div>
+              
+              <!-- Active Layers -->
+              <div class="treeview">      
+                <ul>
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="activeLayers" />
+                    <!-- <label class="bmlabel" for="activeLayers">Active Personal Layers</label> -->
+                    <div class="activeLayersInfo" style="display: none;">
+                      <div id="layerInfo">
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              
+            </div>
+          </div>
+<!-- EXTRA MAP STUFF -->
+            <div class="card bmcard">
+              <div class="card-header bmcard-header" id="headingFive">
+                <div class="bmpanel panel-default">
+                  <div class="panel-heading bmpanel-heading">
+                  <h5 class="panel-title" data-toggle="collapse" data-target="#collapseFive">
+                    Extras                  
+                  </h5>
+                </div>
+              </div>
+            </div>
+            <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordion">
+              
+              <div class="treeview">      
+                <ul>
+                  <!-- Extruded Choropleth Info -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="extrudedChoropleth" />
+                    <label class="bmlabel" for="extrudedChoropleth">3D Thematic</label>
+                    <div class="extrudedChoroplethInfo" style="display: none;">
+                      <div id="extrudedLegend">
+                        <p>Population Density (people/mi<sup>2</sup>)</p>
+                      </div>
+                    </div>
+                  </li>
+                  <!-- Animated Choropleth Info -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="animatedChoropleth" />
+                    <label class="bmlabel" for="animatedChoropleth">Animated Thematic</label>
+                    <div class="animatedChoroplethInfo" style="display: none;">
+                      <div class="animatedLegend">
+                        <br>
+                        <p>
+                          This sample shows the estimated % population change between 2000 and 2010 of each US county relative
+                          to the 2000 census population data. This sample uses two data files; a GeoJSON file that contains the US county boundary data, and a CSV file that contains the population
+                          data. This sample cross references the population data and adds it as properties of the county boundary.
+                        </p>
+                        <hr>
+                        <p>
+                          Population Change Estimates 2000 - 2010
+                        </p>
+                        <canvas id="animatedLegendCanvas"></canvas>
+                        
+                        <div id="animatedlegend-row" class="row">
+                          <div class="">
+                            <p>-30%</p>
+                          </div>
+                          <div class="col-10">
+                            <p class="animatedlegend-mid">0%</p>
+                          </div>
+                          <div class="animatedlegend-max">
+                            <p>30%</p>
+                          </div>
+                        </div>
+                        <br />
+                        <div id="animatedlegend-row" class="row">
+                          <div class="col-6">
+                            <input class="btn btn-secondary btn-sm" id="playPauseBtn" type="button" value="Play/Pause" disabled="disabled" onclick="togglePlayPause()" />
+                          </div>
+                          <div class="col-6">
+                            <p class="animatedlegend-label"><strong>2000</strong></p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  <!-- Animated Weather -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="animatedWeatherMap" />
+                    <label class="bmlabel" for="animatedWeatherMap">Animated Weather</label>
+                    <!-- Animated Weather Info -->
+                    <div class="animatedWeatherMapInfo" style="display: none;">
+                      <!-- <hr> -->
+                      <div id="layerInfo">
+                        <div id="messagePanel"></div>
+                        <input type="button" value="Pause" onclick="animationManager.pause();" />
+                        <input type="button" value="Play" onclick="animationManager.play();" />
+                        <input type="button" value="Stop" onclick="animationManager.stop();" />
+
+                        <p> This sample shows how to animate an sequence of tile layers smoothly.
+                          This example uses the AnimatedTileLayer to animate through an array of tile layers.
+                          For this sample weather radar tiles from the <a
+                            href="https://www.mesonet.agron.iastate.edu/ogc/">Iowa Environmental Mesonet of Iowa
+                            State University</a>
+                          over the USA are animated for the last 50 minutes in 5 minute increments.
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+
+                  <!-- Swipe Between Maps -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="swipeMap" />
+                    <label class="bmlabel" for="swipeMap">Swipe Between Maps</label>
+                    <!-- Swipe Between Maps Info -->
+                    <div class="swipeMapInfo" style="display: none;">
+                      <div id="layerInfo">
+                        <p> This sample shows how to swipe between two overlapping synchronized maps to view different data sets.</p>
+                        <div class="swipemaplegend" style="left: 15px;">
+                          <b>Unemployment rate</b>
+                          <table>
+                              <tr><td><i style="background:#800026" /></td><td>6%+</td></tr>
+                              <tr><td><i style="background:#E31A1C" /></td><td>5% - 5.99%</td></tr>
+                              <tr><td><i style="background:#FD8D3C" /></td><td>4% - 4.99%</td></tr>
+                              <tr><td><i style="background:#FED976" /></td><td>3% - 3.99%</td></tr>
+                              <tr><td><i style="background:#FFEDA0" /></td><td>0% - 2.99%</td></tr>
+                          </table>
+                        </div>
+                  
+                        <div class="swipemaplegend" style="left: 15px;">
+                            <b>Size of labor force</b>
+                            <table>
+                                <tr><td><i style="background:#48006a" /></td><td>100,000+</td></tr>
+                                <tr><td><i style="background:#dd3497" /></td><td>50,000 - 99,999</td></tr>
+                                <tr><td><i style="background:#fcc5c0" /></td><td>10,000 - 49,999</td></tr>
+                                <tr><td><i style="background:#fff7f3" /></td><td>0 - 9,999</td></tr>
+                            </table>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                  <!-- Clustered Pie HTML Markers -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="clusteredPieMarker" />
+                    <label class="bmlabel" for="clusteredPieMarker">Clustered Pie HTML Markers</label>
+                    <!-- Clustered Pie HTML Markers Info -->
+                    <div class="clusteredPieMarkerInfo" style="display: none;">
+                      <div id="layerInfo">
+                        <div class="legend">
+                          <p> This sample shows how to swipe between two overlapping synchronized maps to view different data sets.</p>
+                          <table>
+                              <tr>
+                                  <td><div class="color-box" style="background-color:#3366CC"></div></td>
+                                  <td>Gas Station</td>
+                              </tr>
+                              <tr>
+                                  <td><div class="color-box" style="background-color:#DC3912"></div></td>
+                                  <td>Grocery Store</td>
+                              </tr>
+                              <tr>
+                                  <td><div class="color-box" style="background-color:#FF9900"></div></td>
+                                  <td>Restaurant</td>
+                              </tr>
+                              <tr>
+                                  <td><div class="color-box" style="background-color:#109618"></div></td>
+                                  <td>School</td>
+                              </tr>
+                          </table>
+                      </div>                  
+                      </div>
+                    </div>
+                  </li>
+
+                  <!-- Download Map as Image -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="downloadMapImg" />
+                    <label class="bmlabel" for="downloadMapImg">Download Map as Image</label>
+                    <div class="downloadMapImgInfo" style="display: none;">
+                      <div id="layerInfo">
+                        <input id="downloadButton" class="btn btn-secondary btn-sm" type="button" value="Download" onclick="downloadMapImage();" />
+                      </div>
+                    </div>
+                  </li>
+
+                  <!-- Display cluster area with Convex Hull -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="displayClusterArea" />
+                    <label class="bmlabel" for="displayClusterArea">Display cluster area with Convex Hull</label>
+                    <div class="displayClusterAreaInfo" style="display: none;">
+                      <div id="layerInfo">
+                        <div class="legend">
+                          This sample shows how to display the area of the points contained within a cluster by calculating a convex hull. 
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                  <!-- Travel time analysis of multiple locations -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="travelTimeAnalysis" />
+                    <label class="bmlabel" for="travelTimeAnalysis">Travel time analysis of multiple locations</label>
+                    <div class="travelTimeAnalysisInfo" style="display: none;">
+                      <div id="layerInfo">
+                        <div class="legend">
+                          <p>
+                            This sample shows how to add calculate travel times areas for multiple points
+                            This sample uses the Azure Maps Route Range service to calculate a 5 minute pedestrian (walking) travel time around police stations in Chicago, and then joins it with the location of bike racks.
+                            This analysis tells us how many bike racks are within a 5 minute walk of a police station in Chicago.
+                          </p>
+                          <div class="swipemaplegend">
+                          	<b>Number of Bike Racks</b>
+                          	<table>
+                          	    <tr><td><i style='background:#0868ac' /></td><td>5+</td></tr>
+                          	    <tr><td><i style='background:#43a2ca' /></td><td>4</td></tr>
+                          	    <tr><td><i style='background:#7bccc4' /></td><td>3</td></tr>
+                          	    <tr><td><i style='background:#bae4bc' /></td><td>2</td></tr>
+                          	    <tr><td><i style='background:#f0f9e8' /></td><td>1</td></tr>
+                          	</table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                  <!-- Filter Data Along Route -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="filterDataAlongRoute" />
+                    <label class="bmlabel" for="filterDataAlongRoute">Filter Data Along Route</label>
+                    <div class="filterDataAlongRouteInfo" style="display: none;">
+                      <div id="layerInfo">
+                        <div class="legend">
+                          <p>
+                            This sample shows how to take a route line and calculate a buffer around it and then filter
+                            a set of point data to find those that are within the buffer.
+                          </p>
+                          <table>
+                            <tr>
+                              <td>Points Within Buffer:</td>
+                              <td>
+                                <div id="bufferoutput"> </div>  
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>Start: </td>
+                              <td><input type="text" id="startTbx" value="Seattle" /></td>
+                            </tr>
+                            <tr>
+                              <td>End: </td>
+                              <td><input type="text" id="endTbx" value="Redmond" /></td>
+                            </tr>
+                            <tr>
+                              <td></td>
+                              <td><input type="button" value="Calculate Route" onclick="calculateRoute()" /></td>
+                            </tr>
+                            <tr>
+                              <td>Buffer: </td>
+                              <td>
+                                <form oninput="bd.value=bufferDistance.value">
+                                  <input type="range" id="bufferDistance" value="1" min="0.1" max="5" step="0.1"
+                                    onchange="filterData()" />
+                                  <output name="bd" for="bufferDistance">1</output>
+                                  <label> miles</label>
+                                </form>
+                              </td>
+                            </tr>
+                            
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                  <!-- Census block group analysis -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="censusBlockGroup" />
+                    <label class="bmlabel" for="censusBlockGroup">Census block group analysis</label>
+                    <div class="censusBlockGroupInfo" style="display: none;">
+                      <div id="layerInfo">
+                        <div class="legend">
+                          This sample loads census block group data for a state and then retrieves the intersection with an area drawn by the user and calculates an estimated population.
+                          Not only does it take into consideration the population of each census block group, but also the amount of overlap they have with the drawn area as well. <br /><br />
+                          US Census 2010 data used in this sample:
+                          <ul>
+                              <li><a href="https://www.census.gov/geographies/mapping-files/2013/geo/kml-cartographic-boundary-files.html" target="_blank">Block Group Cartographic Boundary Files</a></li>
+                              <li><a href="https://www.census.gov/geographies/reference-files/time-series/geo/centers-population.html" target="_blank">Centers of Population by Block Group</a></li>
+                          </ul>
+                          <br>
+                          State:
+                          <select id="stateFipCodes" onchange="stateChanged()">
+                              <option value=""></option>
+                              <option value="01">Alabama</option>
+                              <option value="02">Alaska</option>
+                              <option value="04">Arizona</option>
+                              <option value="05">Arkansas</option>
+                              <option value="06">California</option>
+                              <option value="08">Colorado</option>
+                              <option value="09">Connecticut</option>
+                              <option value="10">Delaware</option>
+                              <option value="11">District of Columbia</option>
+                              <option value="12">Florida</option>
+                              <option value="13">Georgia</option>
+                              <option value="15">Hawaii</option>
+                              <option value="16">Idaho</option>
+                              <option value="17">Illinois</option>
+                              <option value="18">Indiana</option>
+                              <option value="19">Iowa</option>
+                              <option value="20">Kansas</option>
+                              <option value="21">Kentucky</option>
+                              <option value="22">Louisiana</option>
+                              <option value="23">Maine</option>
+                              <option value="24">Maryland</option>
+                              <option value="25">Massachusetts</option>
+                              <option value="26">Michigan</option>
+                              <option value="27">Minnesota</option>
+                              <option value="28">Mississippi</option>
+                              <option value="29">Missouri</option>
+                              <option value="30">Montana</option>
+                              <option value="31">Nebraska</option>
+                              <option value="32">Nevada</option>
+                              <option value="33">New Hampshire</option>
+                              <option value="34">New Jersey</option>
+                              <option value="35">New Mexico</option>
+                              <option value="36">New York</option>
+                              <option value="37">North Carolina</option>
+                              <option value="38">North Dakota</option>
+                              <option value="39">Ohio</option>
+                              <option value="40">Oklahoma</option>
+                              <option value="41">Oregon</option>
+                              <option value="42">Pennsylvania</option>
+                              <option value="44">Rhode Island</option>
+                              <option value="45">South Carolina</option>
+                              <option value="46">South Dakota</option>
+                              <option value="47">Tennessee</option>
+                              <option value="48">Texas</option>
+                              <option value="49">Utah</option>
+                              <option value="50">Vermont</option>
+                              <option value="51">Virginia</option>
+                              <option value="53">Washington</option>
+                              <option value="54">West Virginia</option>
+                              <option value="55">Wisconsin</option>
+                              <option value="56">Wyoming</option>
+                          </select>
+                          <br /><br />
+                          <div id="aggregateStats"></div>
+                        </div>                                    
+                      </div>
+                    </div>
+                  </li>
+
+                  <!-- Select data in drawn polygon area -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="selectDataDrawTool" />
+                    <label class="bmlabel" for="selectDataDrawTool">Select data in drawn polygon area</label>
+                    <div class="selectDataDrawToolInfo" style="display: none;">
+                      <div id="layerInfo">
+                        <div class="legend">
+                          <p>
+                            This sample uses the open source <a href="https://turfjs.org/" target="_blank">Turf.js</a> library to for some of the spatial calculation.
+                          </p>
+                          <div id="output"></div>  
+                          <div style="clear:both"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                  <!-- Map Style Options -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="mapStyleOptions" />
+                    <label class="bmlabel" for="mapStyleOptions">Map Style Options</label>
+                    <div class="mapStyleOptionsInfo" style="display: none;">
+                      <div id="layerInfo">
+                        <div class="legend">
+                          <p>
+                            This sample shows how the different style options of the map affect rendering.
+                          </p>
+                              <table>
+                                  <!-- <tr title="If true the map will automatically resize whenever the window's size changes. Otherwise map.resize() must be called.">
+                                      <td>Auto resize:</td>
+                                      <td><input id="autoResize" type="checkbox" onclick="updateStyles()" checked="checked" /></td>
+                                  </tr> -->
+                                  <tr title="Specifies if multiple copies of the world should be rendered when zoomed out. ">
+                                      <td>Render world copies:</td>
+                                      <td><input id="renderWorldCopies" type="checkbox" onclick="updateStyles()" checked="checked" /></td>
+                                  </tr>
+                                  <tr title="Specifies if buildings will be rendered with their models. If false all buildings will be rendered as just their footprints.">
+                                      <td>Show building models:</td>
+                                      <td><input id="showBuildingModels" type="checkbox" onclick="updateStyles()" /></td>
+                                  </tr>
+                                  <!-- <tr title="Specifies if the feedback link should be displayed on the map or not.">
+                                      <td>Show feedback link:</td>
+                                      <td><input id="showFeedbackLink" type="checkbox" onclick="updateStyles()" checked="checked" /></td>
+                                  </tr>
+                                  <tr title="Specifies if the Microsoft logo should be hidden or not. If set to true a Microsoft copyright string will be added to the map.">
+                                      <td>Show logo:</td>
+                                      <td><input id="showLogo" type="checkbox" onclick="updateStyles()" checked="checked" /></td>
+                                  </tr> -->
+                                  <tr title="Specifies if the map should render an outline around each tile and the tile ID. These tile boundaries are useful for debugging. The uncompressed file size of the first vector source is drawn in the top left corner of each tile, next to the tile ID. ">
+                                      <td>Show tile boundaries:</td>
+                                      <td><input id="showTileBoundaries" type="checkbox" onclick="updateStyles()" /></td>
+                                  </tr>
+                              </table>
+                              <br>
+                              <p>
+                                  In addition to the options in this tool, the map also supports the following style options;
+                                  <ul>
+                                      <li>preserveDrawingBuffer - allows the map canvas to be exported as an image.</li>
+                                      <li>language - the language of the map.</li>
+                                      <li>view - the geopolical region view to align with.</li>
+                                  </ul>
+                              </p>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                  <!-- Reverse Geocode -->
+                  <li>
+                    <input class="treeviewChBx" type="checkbox" id="reverseGeocode">
+                    <label class="bmlabel" for="reverseGeocode">Reverse Geocode</label>
+                    <div class="reverseGeocodeInfo" style="display: none;">
+                      <div id="layerInfo">
+                        <div class="legend">
+                          <p>Click on the map to get the address at those coordinates</p>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                </ul>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+        <!-- Azure Maps Logo -->
+        <div class="azureMapsLogo" id="">
+          <img id="" src="./images/azure_maps_logo.png" alt="Azure Maps Logo">
+        </div>
+      </div>
+      <!-- Map Container -->
+      <div class="mapContainer">
+        <div id="myMap">
+        </div>
+        <img id="mainLoadingIcon" src="./images/loadingIcon.gif" title="Loading" style="display:none;" />
+
+      </div>
+      <!-- Swipe Map Container -->
+      <div class="swipeMapContainer" style="display: none;">
+        <div id="primaryMap" class="map"></div>
+        <div id="secondaryMap" class="map"></div>
+    </div>
+    </div>
+<!--------------------------------------------------------
+
+  Modal Popup for adding files
+  
+  -Modal is placed here in the html code as we wanted it to have 
+  absolute positioning of the body and needed to remove it from 
+  being nested with the button it is associated with
+
+--------------------------------------------------------->
+    <div class="modal fade" id="uberModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">
+              Add File/Layer
+            </h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">
+                &times;
+              </span>
+            </button>
+            
+          </div>
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <div class="">
+              <p class="addFileDesc">You can add SHP files large and small as either zip or all the files in a single selection. As well 
+                KML, KMZ, GPX, GeoRSS, GML, GeoJSON, and CSV (with spatial columns). OGC files are also supported. Design options will only
+                be applied to its corresponding layer type.
+                <strong>
+                  To allow proper customization
+                  to your file, limit your selection to one file name.
+                </strong> 
+                Files will be displayed in the preview map with options to customize the layer. Click save changes to add it to the main map. 
+              </p>
+              <p class="addFileDesc">*When editing polygon layers, use the line layer options to change the edges of the polygon shapes.</p>
+            </div>
+            <!-- File Type Selection -->
+            <div class="text-center">
+             
+              <div class="col-12">
+                 <!-- Select File -->
+                <input class="btn btn-sm btn-secondary" type="button" id="addFileBtn" value="Select File(s)">
+                <form class="filesfrm" action="/upload" method="post" onsubmit="return submitFilesForm(this);"
+                  style="display: none;">
+                  <input type="file" name="filesfld" class="filesfld" onchange="submitFilesForm(this.form);"
+                    multiple />
+                  <label for="filesfld" class="fileslbl" ondragover="stopDefault(event);"
+                    ondragenter="stopDefault(event);" ondragleave="stopDefault(event);"
+                    ondrop="stopDefault(event);addFilesAndSubmit(event);"></label>
+                </form>
+              </div>
+            </div>
+
+            <!-- Layer Selection For Designs -->
+            <div class="form-group">
+              <label class="font-noraml">
+                Select Layer Design Options
+              </label>
+              <div class="input-group">
+                <select name="layerDesignSelections" data-placeholder="Select a layer type..." class="form-control chosen-select" style="width:350px;"
+                  tabindex="2">
+                  <option value="">
+                  </option>
+                  <option value="Polygon">
+                    Polygon
+                  </option>
+                  <option value="Line">
+                    Line
+                  </option>
+                  <option value="Point">
+                    Point
+                  </option>
+                  <option value="Simple">
+                    Simple
+                  </option>
+                  <option value="OGC">
+                    OGC
+                  </option>
+                  
+                </select>
+              </div>
+            </div>
+            <!-- Preview Map -->
+            <div class="row">
+              <div class="col-6">
+                <fieldset class="sidePanel">
+                  <div class="layerDesignBox">
+
+                    <!-- Polygon Design Options -->
+                    <div class="polygonDesignOptions" style="display: none;">
+                      <div class="tab">
+                        <button id="polyStyleOptionsTab" class="tablinks active"
+                          onclick="openPolyTab(this, 'polyStyleOptions')">Polygon Options</button>
+                        <button id="polyCodeTab" class="tablinks" onclick="openPolyTab(this, 'polyCode')">Code</button>
+                      </div>
+
+                      <div id="polyStyleOptions" class="tabcontent" style="display:block;">
+                        <table>
+                          <tr title="The color to fill the polygons with.">
+                            <td><input id="fillColorBtn" name="fillGroup" type="radio" onclick="updatePolygonLayer()"
+                                checked="checked" /> Fill Color:</td>
+                            <td>
+                              <input type="color" value="#1A73AA" id="FillColor" onchange="updatePolygonLayer()" />
+                              <input type="checkbox" id="FillColorTransparent"
+                                onclick="updatePolygonLayer()" />Transparent
+                            </td>
+                          </tr>
+                          <tr title="The color gradient expression to colorize the heat map.">
+                            <td><input name="fillGroup" type="radio" onclick="updatePolygonLayer()" />Fill Pattern:
+                            </td>
+                            <td>
+                              <div class="dropdown">
+                                <button id="fillPatternBtn" onclick="toggleFillPatternDropdown()"
+                                  class="dropbtn"></button>
+                                <div id="fillPatternDropdown" class="dropdown-content">
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr
+                            title="A number between 0 and 1 that indicates the opacity at which the fill will be drawn.">
+                            <td>Fill Opacity:</td>
+                            <td>
+                              <form oninput="o.value=FillOpacity.value">
+                                <input type="range" id="polyFillOpacity" value="0.5" min="0" max="1" step="0.1"
+                                  oninput="updatePolygonLayer()" onchange="updatePolygonLayer()" />
+                                <output name="o" for="polyFillOpacity">0.5</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="An integer specifying the minimum zoom level to render the layer at.">
+                            <td>Min Zoom:</td>
+                            <td>
+                              <form oninput="minz.value=MinZoom.value">
+                                <input type="range" id="polyMinZoom" value="0" min="0" max="24" step="1"
+                                  oninput="updatePolygonLayer()" onchange="updatePolygonLayer()" />
+                                <output name="minz" for="polyMinZoom">0</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="An integer specifying the maximum zoom level to render the layer at.">
+                            <td>Min Zoom:</td>
+                            <td>
+                              <form oninput="maxz.value=MaxZoom.value">
+                                <input type="range" id="polyMaxZoom" value="24" min="0" max="24" step="1"
+                                  oninput="updatePolygonLayer()" onchange="updatePolygonLayer()" />
+                                <output name="maxz" for="polyMaxZoom">24</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="Specifies if the layer is visible or not.">
+                            <td>Visible:</td>
+                            <td><input id="polyVisible" type="checkbox" onclick="updatePolygonLayer()"
+                                checked="checked" /></td>
+                          </tr>
+                        </table>
+
+                        <p>
+                          In addition to the options in this tool, the PolygonLayer also has options for;
+                          <ul>
+                            <li>sourceLayer - used with VectorTileSource.</li>
+                            <li>filter - used to filter data in layer.</li>
+                          </ul>
+                        </p>
+                      </div>
+                      <div id="polyCode" class="tabcontent">
+                        <textarea id="polyDesignCodeOutput"></textarea><br /><br />
+                        <input id="RemoveDefaults" type="checkbox" onclick="updatePolygonLayer()" checked="checked" />
+                        Remove defaults
+                        <button class="copyBtn" data-clipboard-target="#polyDesignCodeOutput">Copy to clipboard</button>
+                      </div>
+                    </div>
+
+                    <!-- Line Design Options -->
+                    <div class="lineDesignOptions" style="display: none;">
+                      <div class="tab">
+                        <button id="lineBaseOptionsTab" class="tablinks active"
+                          onclick="openLineTab(this, 'lineBaseOptions')">Base
+                          Options</button>
+                        <button id="lineLayerOptionsTab" class="tablinks"
+                          onclick="openLineTab(this, 'lineLayerOptions')">Line
+                          Options</button>
+                        <button id="lineCodeTab" class="tablinks" onclick="openLineTab(this, 'lineCode')">Code</button>
+                      </div>
+
+                      <div id="lineBaseOptions" class="tabcontent" style="display:block;">
+                        <table>
+                          <tr title="An integer specifying the minimum zoom level to render the layer at.">
+                            <td>Min Zoom:</td>
+                            <td>
+                              <form oninput="minz.value=MinZoom.value">
+                                <input type="range" id="lineMinZoom" value="0" min="0" max="24" step="1"
+                                  oninput="updateLineLayer()" onchange="updateLineLayer()" />
+                                <output name="minz" for="lineMinZoom">0</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="An integer specifying the maximum zoom level to render the layer at.">
+                            <td>Min Zoom:</td>
+                            <td>
+                              <form oninput="maxz.value=MaxZoom.value">
+                                <input type="range" id="lineMaxZoom" value="24" min="0" max="24" step="1"
+                                  oninput="updateLineLayer()" onchange="updateLineLayer()" />
+                                <output name="maxz" for="lineMaxZoom">24</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="Specifies if the layer is visible or not.">
+                            <td>Visible:</td>
+                            <td><input id="lineVisible" type="checkbox" onclick="updateLineLayer()" checked="checked" />
+                            </td>
+                          </tr>
+                        </table>
+
+                        <p>
+                          In addition to the options in this tool, the LineLayer also has options for;
+                          <ul>
+                            <li>sourceLayer - used with VectorTileSource.</li>
+                            <li>filter - used to filter data in layer.</li>
+                          </ul>
+                          Many options in this layer also support Expressions which are not demonstrated in this sample.
+                        </p>
+                      </div>
+                      <div id="lineLayerOptions" class="tabcontent">
+                        <table>
+                          <tr title="Specifies how the ends of the lines are rendered">
+                            <td>Line Cap:</td>
+                            <td>
+                              <select id="lineCap" onchange="updateLineLayer()">
+                                <option
+                                  title="A cap with a squared-off end which is drawn to the exact endpoint of the line."
+                                  value="butt">butt</option>
+                                <option
+                                  title="A cap with a rounded end which is drawn beyond the endpoint of the line at a radius of one-half of the lines width and centered on the endpoint of the line."
+                                  value="round" selected="selected">round</option>
+                                <option
+                                  title="A cap with a squared-off end which is drawn beyond the endpoint of the line at a distance of one-half of the line width."
+                                  value="square">square</option>
+                              </select>
+                            </td>
+                          </tr>
+                          <tr title="Specifies how the joints in the lines are rendered">
+                            <td>Line Join:</td>
+                            <td>
+                              <select id="lineJoin" onchange="updateLineLayer()">
+                                <option
+                                  title="A join with a squared-off end drawn beyond the endpoint of the line at a distance of one-half of the lines width"
+                                  value="bevel">bevel</option>
+                                <option
+                                  title="A join with a rounded end which is drawn beyond the endpoint of the line at a radius of one-half of the lines width and centered on the endpoint of the line."
+                                  value="round" selected="selected">round</option>
+                                <option
+                                  title="A join with a sharp, angled corner which is drawn with the outer sides beyond the endpoint of the path until they meet."
+                                  value="mitter">miter</option>
+                              </select>
+                            </td>
+                          </tr>
+                          <tr title="Specifies the color of the line. Default #1E90FF.">
+                            <td>Stroke Color:</td>
+                            <td><input type="color" id="lineStrokeColor" value="#1E90FF" onchange="updateLineLayer()" />
+                            </td>
+                          </tr>
+
+                          <tr
+                            title="A number between 0 and 1 that indicates the opacity at which the line will be drawn.">
+                            <td>Stroke Opacity</td>
+                            <td>
+                              <form oninput="strokeOpacity.value=StrokeOpacity.value">
+                                <input type="range" id="lineStrokeOpacity" value="1" min="0" max="1" step="0.1"
+                                  oninput="updateLineLayer()" onchange="updateLineLayer()" />
+                                <output name="strokeOpacity" for="lineStrokeOpacity">1</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr
+                            title="Specifies the lengths of the alternating dashes and gaps that form the dash pattern.">
+                            <td>Stroke Dash</td>
+                            <td>
+                              <input type="text" id="lineStrokeDashArray" onkeyup="updateLineLayer()" />
+                            </td>
+                          </tr>
+                          <tr title="The width of the line in pixels."">
+                            <td>Stroke Width</td>
+                            <td>
+                              <form oninput=" strokeWidth.value=StrokeWidth.value">
+                            <input type="range" id="lineStrokeWidth" value="2" min="0" max="10" step="1"
+                              oninput="updateLineLayer()" onchange="updateLineLayer()" />
+                            <output name="strokeWidth" for="lineStrokeWidth">2</output>
+                            </form>
+                            </td>
+                          </tr>
+                          <tr title="The amount of blur to apply to the line in pixels. Default 0.">
+                            <td>Blur</td>
+                            <td>
+                              <form oninput="b.value=Blur.value">
+                                <input type="range" id="lineBlur" value="0" min="0" max="25" step="1"
+                                  oninput="updateLineLayer()" onchange="updateLineLayer()" />
+                                <output name="b" for="lineBlur">0</output>
+                              </form>
+                            </td>
+                            <td>
+
+                            </td>
+                          </tr>
+                          <tr title="Specifies the orientation of the line when map is pitched.">
+                            <td>Pitch Alignment:</td>
+                            <td>
+                              <select id="linePitchAlignment" onchange="updateLineLayer()">
+                                <option value="map">map</option>
+                                <option value="viewport" selected="selected">viewport</option>
+                              </select>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+
+                      <div id="lineCode" class="tabcontent">
+                        <textarea id="lineDesignCodeOutput"></textarea><br /><br />
+                        <input id="lineRemoveDefaults" type="checkbox" onclick="updateLineLayer()" checked="checked" />
+                        Remove defaults
+                        <button class="copyBtn" data-clipboard-target="#lineDesignCodeOutput">Copy to clipboard</button>
+                      </div>
+                    </div>
+
+                    <!-- Point and Multipoint Options -->
+                    <div class="pointDesignOptions" style="display: none;">
+                      <div class="tab">
+                        <button id="pointBaseOptionsTab" class="tablinks active"
+                          onclick="openPointTab(this, 'pointBaseOptions')">Base
+                          Options</button>
+                        <button id="pointLayerOptionsTab" class="tablinks"
+                          onclick="openPointTab(this, 'pointLayerOptions')">Point
+                          Options</button>
+                        <button id="pointCodeTab" class="tablinks"
+                          onclick="openPointTab(this, 'pointCode')">Code</button>
+                      </div>
+
+                      <div id="pointBaseOptions" class="tabcontent" style="display:block;">
+                        <table>
+                          <tr title="An integer specifying the minimum zoom level to render the layer at.">
+                            <td>Min Zoom:</td>
+                            <td>
+                              <form oninput="minz.value=MinZoom.value">
+                                <input type="range" id="pointMinZoom" value="0" min="0" max="24" step="1"
+                                  oninput="updatePointLayer()" onchange="updatePointLayer()" />
+                                <output name="minz" for="pointMinZoom">0</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="An integer specifying the maximum zoom level to render the layer at.">
+                            <td>Min Zoom:</td>
+                            <td>
+                              <form oninput="maxz.value=MaxZoom.value">
+                                <input type="range" id="pointMaxZoom" value="24" min="0" max="24" step="1"
+                                  oninput="updatePointLayer()" onchange="updatePointLayer()" />
+                                <output name="maxz" for="pointMaxZoom">24</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="Specifies if the layer is visible or not.">
+                            <td>Visible:</td>
+                            <td><input id="pointVisible" type="checkbox" onclick="updatePointLayer()"
+                                checked="checked" />
+                            </td>
+                          </tr>
+                        </table>
+
+                        <p>
+                          In addition to the options in this tool, the BubbleLayer also has options for;
+                          <ul>
+                            <li>sourceLayer - used with VectorTileSource.</li>
+                            <li>filter - used to filter data in layer.</li>
+                          </ul>
+                          Many options in this layer also support Expressions which are not demonstrated in this sample.
+                        </p>
+                      </div>
+                      <div id="pointLayerOptions" class="tabcontent">
+                        <table>
+                          <tr title="The color to fill the circle symbol with.">
+                            <td>Color:</td>
+                            <td><input type="color" id="pointColor" value="#1A73AA" onchange="updatePointLayer()" />
+                            </td>
+                          </tr>
+                          <tr
+                            title="A number between 0 and 1 that indicates the opacity at which the circles will be drawn.">
+                            <td>Opacity</td>
+                            <td>
+                              <form oninput="opacity.value=Opacity.value">
+                                <input type="range" id="pointOpacity" value="1" min="0" max="1" step="0.1"
+                                  oninput="updatePointLayer()" onchange="updatePointLayer()" />
+                                <output name="opacity" for="pointOpacity">1</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="The color of the circles' outlines.">
+                            <td>Stroke Color:</td>
+                            <td><input type="color" id="pointStrokeColor" value="#FFFFFF"
+                                onchange="updatePointLayer()" />
+                            </td>
+                          </tr>
+                          <tr title="The radius of the circle in pixels.">
+                            <td>Radius</td>
+                            <td>
+                              <form oninput="radius.value=Radius.value">
+                                <input type="range" id="pointRadius" value="5" min="0" max="50" step="1"
+                                  oninput="updatePointLayer()" onchange="updatePointLayer()" />
+                                <output name="radius" for="pointRadius">5</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr
+                            title="A number between 0 and 1 that indicates the opacity at which the circles' outlines will be drawn.">
+                            <td>Stroke Opacity</td>
+                            <td>
+                              <form oninput="strokeOpacity.value=StrokeOpacity.value">
+                                <input type="range" id="pointStrokeOpacity" value="1" min="0" max="1" step="0.1"
+                                  oninput="updatePointLayer()" onchange="updatePointLayer()" />
+                                <output name="strokeOpacity" for="pointStrokeOpacity">1</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="The width of the circles" outlines in pixels.">
+                            <td>Stroke Width</td>
+                            <td>
+                              <form oninput="strokeWidth.value=StrokeWidth.value">
+                                <input type="range" id="pointStrokeWidth" value="2" min="0" max="10" step="1"
+                                  oninput="updatePointLayer()" onchange="updatePointLayer()" />
+                                <output name="strokeWidth" for="pointStrokeWidth">2</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr
+                            title="The amount to blur the circles. A value of 1 blurs the circles such that only the center point if at full opacity.">
+                            <td>Blur</td>
+                            <td>
+                              <form oninput="blur.value=Blur.value">
+                                <input type="range" id="pointBlur" value="0" min="0" max="1" step="0.1"
+                                  oninput="updatePointLayer()" onchange="updatePointLayer()" />
+                                <output name="blur" for="pointBlur">0</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="Specifies the orientation of circle when map is pitched.">
+                            <td>Pitch Alignment:</td>
+                            <td>
+                              <select id="pointPitchAlignment" onchange="updatePointLayer()">
+                                <option value="map">map</option>
+                                <option value="viewport" selected="selected">viewport</option>
+                              </select>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+
+                      <div id="pointCode" class="tabcontent">
+                        <textarea id="pointDesignCodeOutput"></textarea><br /><br />
+                        <input id="pointRemoveDefaults" type="checkbox" onclick="updatePointLayer()"
+                          checked="checked" />
+                        Remove defaults
+                        <button class="copyBtn" data-clipboard-target="#pointDesignCodeOutput">Copy to
+                          clipboard</button>
+                      </div>
+                    </div>
+
+                    <!-- Simple Layer Options -->
+                    <div class="simpleDesignOptions" style="display: none;">
+                      <div class="tab">
+                        <button id="simpleStyleOptionsTab" class="tablinks active" onclick="openSimpleTab(this, 'simpleDataLayerOptions')">Layer
+                          Options</button>
+                        <button class="tablinks" onclick="openSimpleTab(this, 'simpleCode')">Code</button>
+                      </div>
+
+                      <div id="simpleDataLayerOptions" class="tabcontent" style="display:block;">
+                        <table>
+                          <tr
+                            title="Specifies if polygons that have a height property should be rendered as extruded polygons. Default: true">
+                            <td>Allow extrusions:</td>
+                            <td><input id="allowExtrusions" type="checkbox" onclick="updateSimpleLayer()" checked="checked" />
+                            </td>
+                          </tr>
+                          <tr title="Specifies if popups should appear when shapes are clicked. Default: true">
+                            <td>Enable popups:</td>
+                            <td><input id="enablePopups" type="checkbox" onclick="updateSimpleLayer()" checked="checked" />
+                            </td>
+                          </tr>
+                          <tr
+                            title="If a point feature has a title or name property, this option specifies if it should be displayed on the map under the marker. Default: false">
+                            <td>Show point titles:</td>
+                            <td><input id="showPointTitles" type="checkbox" onclick="updateSimpleLayer()" /></td>
+                          </tr>
+                          <tr title="Specifies if the layer is visible or not.">
+                            <td>Visible:</td>
+                            <td><input id="simpleVisible" type="checkbox" onclick="updateSimpleLayer()" checked="checked" /></td>
+                          </tr>
+                        </table>
+
+                        <p>
+                          In addition to the options in this tool, the simple data layer also has options for;
+                          <ul>
+                            <li>popupTemplate - used to customize the layout of content in the popups.</li>
+                          </ul>
+                          Note that the simple data layer uses style information stored in the properties of individual
+                          features to customize how each feature is rendered. The getLayer() function can be used to
+                          override this behaviour in the sub-layers.
+                        </p>
+                      </div>
+
+                      <div id="simpleCode" class="tabcontent">
+                        <textarea id="simpleCodeOutput"></textarea><br /><br />
+                        <input id="RemoveDefaults" type="checkbox" onclick="updateSimpleLayer()" checked="checked" /> Remove
+                        defaults
+                        <button class="copyBtn" data-clipboard-target="#simpleCodeOutput">Copy to clipboard</button>
+                      </div>
+                    </div>
+
+                    <!-- OGC Layer Options -->
+                    <div class="OGCDesignOptions" style="display: none;">
+
+                      <div class="tab">
+                        <button id="OGCStyleOptionsTab" class="tablinks active" onclick="openOGCTab(this, 'OGCStyleOptions')">Base
+                          Options</button>
+                        <button class="tablinks" onclick="openOGCTab(this, 'OGCMediaOptions')">Media
+                          Options</button>
+                        <button class="tablinks" onclick="openOGCTab(this, 'OGCLayerOptions')">Layer
+                          options</button>
+                        <button class="tablinks" onclick="openOGCTab(this, 'OGCCode')">Code</button>
+                      </div>
+
+                      <div id="OGCStyleOptions" class="tabcontent" style="display:block;">
+                        <table>
+                          <tr title="An integer specifying the minimum zoom level to render the layer at.">
+                            <td>Min Zoom:</td>
+                            <td>
+                              <form oninput="minz.value=MinZoom.value">
+                                <input type="range" id="OGCMinZoom" value="0" min="0" max="24" step="1"
+                                  oninput="updateOGCLayer()" onchange="updateOGCLayer()" />
+                                <output name="minz" for="OGCMinZoom">0</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="An integer specifying the maximum zoom level to render the layer at.">
+                            <td>Max Zoom:</td>
+                            <td>
+                              <form oninput="maxz.value=MaxZoom.value">
+                                <input type="range" id="OGCMaxZoom" value="24" min="0" max="24" step="1"
+                                  oninput="updateOGCLayer()" onchange="updateOGCLayer()" />
+                                <output name="maxz" for="OGCMaxZoom">24</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="Specifies if the layer is visible or not.">
+                            <td>Visible:</td>
+                            <td><input id="OGCVisible" type="checkbox" onclick="updateOGCLayer()" checked="checked" />
+                            </td>
+                          </tr>
+                        </table>
+
+                        <p>
+                          In addition to the options in this tool, the OGC map layer also has options for;
+                          <ul>
+                            <li>activeLayers - Specifies the sublayers in the service to render.</li>
+                            <li>dimensions - Custom dimensions to add to tile requests.</li>
+                            <li>proxyService - URL to a CORs enabled proxy service.</li>
+                            <li>service - Specify if service is WMS or WMTS. Auto detected by default.</li>
+                            <li>styles - The styles of the active layers.</li>
+                            <li>version - The service version to use in requests. Auto detected by default.</li>
+                          </ul>
+                        </p>
+                      </div>
+
+                      <div id="OGCMediaOptions" class="tabcontent">
+                        <table>
+                          <tr title="The duration in milliseconds of a fade transition when a new tile is added. ">
+                            <td>Fade Duration</td>
+                            <td>
+                              <form oninput="fadeDuration.value=FadeDuration.value">
+                                <input type="range" id="FadeDuration" value="300" min="0" max="1000" step="100"
+                                  oninput="updateOGCLayer()" onchange="updateOGCLayer()" />
+                                <output name="fadeDuration" for="FadeDuration">300</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr
+                            title="A number between 0 and 1 that indicates the opacity at which the overlay will be drawn.">
+                            <td>Opacity</td>
+                            <td>
+                              <form oninput="opacity.value=Opacity.value">
+                                <input type="range" id="OGCOpacity" value="1" min="0" max="1" step="0.1"
+                                  oninput="updateOGCLayer()" onchange="updateOGCLayer()" />
+                                <output name="opacity" for="OGCOpacity">1</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr
+                            title="A number between -1 and 1 that increases or decreases the contrast of the overlay.">
+                            <td>Contrast</td>
+                            <td>
+                              <form oninput="contrast.value=Contrast.value">
+                                <input type="range" id="Contrast" value="0" min="-1" max="1" step="0.1"
+                                  oninput="updateOGCLayer()" onchange="updateOGCLayer()" />
+                                <output name="contrast" for="Contrast">0</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr title="Rotates hues around the color wheel. A number in degrees.">
+                            <td>Hue Rotation</td>
+                            <td>
+                              <form oninput="hueRotation.value=HueRotation.value">
+                                <input type="range" id="HueRotation" value="0" min="0" max="360" step="1"
+                                  oninput="updateOGCLayer()" onchange="updateOGCLayer()" />
+                                <output name="hueRotation" for="HueRotation">0</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr
+                            title="A number between 0 and 1 that increases or decreases the maximum brightness of the overlay.">
+                            <td>Max Brightness</td>
+                            <td>
+                              <form oninput="maxBrightness.value=MaxBrightness.value">
+                                <input type="range" id="MaxBrightness" value="1" min="0" max="1" step="0.1"
+                                  oninput="updateOGCLayer()" onchange="updateOGCLayer()" />
+                                <output name="maxBrightness" for="MaxBrightness">1</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr
+                            title="A number between 0 and 1 that increases or decreases the minimum brightness of the overlay.">
+                            <td>Min Brightness</td>
+                            <td>
+                              <form oninput="minBrightness.value=MinBrightness.value">
+                                <input type="range" id="MinBrightness" value="0" min="0" max="1" step="0.1"
+                                  oninput="updateOGCLayer()" onchange="updateOGCLayer()" />
+                                <output name="minBrightness" for="MinBrightness">0</output>
+                              </form>
+                            </td>
+                          </tr>
+                          <tr
+                            title="A number between -1 and 1 that increases or decreases the saturation of the overlay.">
+                            <td>Saturation</td>
+                            <td>
+                              <form oninput="saturation.value=Saturation.value">
+                                <input type="range" id="OGCSaturation" value="0" min="-1" max="1" step="0.1"
+                                  oninput="updateOGCLayer()" onchange="updateOGCLayer()" />
+                                <output name="saturation" for="OGCSaturation">0</output>
+                              </form>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+
+                      <div id="OGCLayerOptions" class="tabcontent">
+                        <table>
+                          <tr title="The URL that points to the service.">
+                            <td>Url:</td>
+                            <td>
+                              <!-- <input type="text" id="url"
+                                value="https://tpwd.texas.gov/arcgis/rest/services/Vegetation_Mapping/Texas_Ecological_Mapping_Systems_Data/mapserver/WMTS/1.0.0/WMTSCapabilities.xml" /> -->
+                            </td>
+                          </tr>
+                          <tr
+                            title="Indicates if the map should set the map view to the bounding box of the layer. Not persistent.">
+                            <td>Bring into view:</td>
+                            <td><input id="bringIntoView" type="checkbox" /></td>
+                          </tr>
+                          <tr
+                            title="Indicates if errors related to accessing the service should be logged to the console.">
+                            <td>Debug:</td>
+                            <td><input id="debug" type="checkbox" /></td>
+                          </tr>
+                          <tr>
+                            <td></td>
+                            <td><input type="button" value="Update layer options" onclick="updateOGCLayer();" /></td>
+                          </tr>
+                        </table>
+                      </div>
+
+                      <div id="OGCCode" class="tabcontent">
+                        <textarea id="OGCCodeOutput"></textarea><br /><br />
+                        <input id="RemoveDefaults" type="checkbox" onclick="updateOGCLayer()" checked="checked" />
+                        Remove defaults
+                        <button class="copyBtn" data-clipboard-target="#OGCCodeOutput">Copy to clipboard</button>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </fieldset>
+
+              </div>
+
+              <div id="previewMap">
+              </div>
+
+              <img id="previewLoadingIcon" src="./images/loadingIcon.gif" title="Loading" style="display:none;" />
+
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" onclick="previewMapDatasource.clear()">
+              Close
+            </button>
+            <!-- TO ADD to BUTTON
+            data-dismiss="modal"
+            -->
+            <button id="saveFileBtn" type="button" class="btn btn-primary" data-dismiss="modal">
+              Save changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+      </div>
+    </footer>
+
+
+</body>
+
+<!-- Main -->
+<script type="text/javascript" src="js/main.js"></script>
+
+<!-- Map Layer JS -->
+<script type="text/javascript" src="js/MapLayers/Choropleth/addChoropleths.js"></script>
+<script type="text/javascript" src="js/MapLayers/Heat Map/addHeatMaps.js"></script>
+<script type="text/javascript" src="js/MapLayers/Bubble/addBubbleLayers.js"></script>
+<script type="text/javascript" src="js/MapLayers/Weather/addWeather.js"></script>
+<script type="text/javascript" src="js/MapLayers/Weather/AnimatedTileLayer.js"></script>
+<script type="text/javascript" src="js/MapLayers/ClusteredPieCharts/addClusteredPieLayer.js"></script>
+<script type="text/javascript" src="js/MapLayers/ClusteredPieCharts/HtmlMarkerLayer.js"></script>
+<script type="text/javascript" src="js/MapLayers/ClusteredPieCharts/PieChartMarker.js"></script>
+<script type="text/javascript" src="js/MapLayers/ConvexHull/getClusterArea.js"></script>
+<script type="text/javascript" src="js/MapLayers/TravelTimeAnalysis/getTravelTimeData.js"></script>
+<script type="text/javascript" src="js/MapLayers/FilterDataAlongRoute/getFilteredData.js"></script>
+<script type="text/javascript" src="js/MapLayers/CensusBlockGroup/getBlockGroupData.js"></script>
+
+<!-- Map Tools JS -->
+<script type="text/javascript" src="js/MapTools/drawingTools.js"></script>
+<script type="text/javascript" src="js/MapTools/mapControls.js"></script>
+<script type="text/javascript" src="js/MapTools/mapSearch.js"></script>
+<script type="text/javascript" src="js/MapTools/MapImageExporter/MapImageExporter.js"></script>
+<script type="text/javascript" src="js/MapTools/MapImageExporter/downloadMapImage.js"></script>
+<script type="text/javascript" src="js/MapTools/mapStyleOptions.js"></script>
+<script type="text/javascript" src="js/MapTools/reverseGeocode.js"></script>
+<script type="text/javascript" src="js/MapTools/selectDataDrawing.js"></script>
+
+<script type="text/javascript" src="js/MapTools/removeLayer.js"></script>
+<script type="text/javascript" src="js/MapTools/addFileLayer.js"></script>
+<script type="text/javascript" src="js/MapTools/layerDesignOptions.js"></script>
+
+<script type="text/javascript" src="js/MapTools/SwipeMaps/swipeBtwnMaps.js"></script>
+<script type="text/javascript" src="js/MapTools/SwipeMaps/SwipeMapModule.js"></script>
+
+<!-- Spatial Map JS -->
+<script type="text/javascript" src="js/MapSpatial/addGeospatialExamples.js"></script>
+<script type="text/javascript" src="js/MapSpatial/OGCFileExplorer.js"></script>
+<script type="text/javascript" src="js/MapSpatial/WFCFileExporer.js"></script>
+
+</html>

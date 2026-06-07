@@ -33,7 +33,7 @@ function createPreviewMap(){
         style: 'grayscale_light',
         authOptions: {
             authType: 'subscriptionKey',
-            subscriptionKey: 'TfUWvWqVnTGKGMcIvxr5coNt7eiWrKxh6wJe0keVZSs'
+            subscriptionKey: window.AZURE_MAPS_KEY
         }
     });
     

@@ -14,6 +14,15 @@ var ActiveLayers = {};
  *      - mapSearch() 
  *    
 ****************************************************************************************/
+function initApp() {
+    fetch('/api/config')
+        .then(function(r) { return r.json(); })
+        .then(function(config) {
+            window.AZURE_MAPS_KEY = config.subscriptionKey;
+            GetMap();
+        });
+}
+
 function GetMap() {
     //Initialize a map instance.
     map = new atlas.Map('myMap', {
@@ -25,7 +34,7 @@ function GetMap() {
 
         authOptions: {
             authType: 'subscriptionKey',
-            subscriptionKey: 'fxg6dMtNQQ3zqgzk_loQeMxznejQj5swKZF9Vcj5rQ0'
+            subscriptionKey: window.AZURE_MAPS_KEY
         },
         // Possible way to hide API key and use a token and clientID
         ////URL to custom endpoint to fetch Access token.

@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx wrangler:*)"
+      "Bash(npx wrangler:*)",
+      "Bash(find \"c:/Users/zack09holland/MyDrive/Programming/github/NodeAzure/app/public\" -type f -size +5M -exec du -h {} \\\\;)",
+      "Bash(bash deploy.sh)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const d=JSON.parse\\(fs.readFileSync\\('c:/Users/zack09holland/MyDrive/Programming/github/NodeAzure/app/public/data/geojson/address.json','utf8'\\)\\); console.log\\('features:', d.features.length, '\\\\nsize:', \\(fs.statSync\\('c:/Users/zack09holland/MyDrive/Programming/github/NodeAzure/app/public/data/geojson/address.json'\\).size/1024/1024\\).toFixed\\(1\\)+'MB'\\);\")",
+      "Bash(node -e ':*)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const d=JSON.parse\\(fs.readFileSync\\('c:/Users/zack09holland/MyDrive/Programming/github/NodeAzure/app/public/data/geojson/parcels.json','utf8'\\)\\); console.log\\('features:', d.features.length, '\\\\nsize:', \\(fs.statSync\\('c:/Users/zack09holland/MyDrive/Programming/github/NodeAzure/app/public/data/geojson/parcels.json'\\).size/1024/1024\\).toFixed\\(1\\)+'MB'\\);\")"
     ]
   }
 }
