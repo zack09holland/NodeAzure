@@ -22,6 +22,9 @@
   <!-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/> -->
 
 
+  <!-- Runtime config injected by Cloudflare Worker (sets window.AZURE_MAPS_KEY) -->
+  <script src="/config.js"></script>
+
   <!-- Add references to the Azure Maps Map control JavaScript and CSS files. -->
   <link rel="stylesheet" href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/3/atlas.min.css" type="text/css" />
   <script src="https://atlas.microsoft.com/sdk/javascript/mapcontrol/3/atlas.min.js"></script>
@@ -58,7 +61,7 @@
 
 </head>
 
-<body onload="initApp()">
+<body onload="GetMap()">
   <!-- Content Container -->
   <div class="row ">
     <div class="" id="headerDiv">

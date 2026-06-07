@@ -14,15 +14,6 @@ var ActiveLayers = {};
  *      - mapSearch() 
  *    
 ****************************************************************************************/
-function initApp() {
-    fetch('/api/config')
-        .then(function(r) { return r.json(); })
-        .then(function(config) {
-            window.AZURE_MAPS_KEY = config.subscriptionKey;
-            GetMap();
-        });
-}
-
 function GetMap() {
     //Initialize a map instance.
     map = new atlas.Map('myMap', {
@@ -51,7 +42,7 @@ function GetMap() {
         //     }
         // }
     });
-    
+
     // Wait until the map resources are ready.
     // (Other Map layer functions are controlled via onclick events)
     map.events.add('ready', function () {

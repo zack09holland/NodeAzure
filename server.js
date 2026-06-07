@@ -54,6 +54,12 @@ app.use(express.static(path.join(__dirname, 'app/public/')));
 //     next();
 //   });
 
+// Serve Azure Maps key as a JS config file so it stays out of source code
+app.get('/config.js', function(_req, res) {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.send(`window.AZURE_MAPS_KEY = "${process.env.AZURE_MAPS_KEY}";`);
+});
+
 // HTTP POST
 // upload image files to server
 app.post("/upload", function(request, response) {
