@@ -1,9 +1,3 @@
 name = "node-azure"
 compatibility_date = "2026-06-07"
-main = "workers-site/index.js"
-
-[site]
-bucket = "./app/public"
-
-# For Cloudflare Pages deployments: directory containing static files to upload
 pages_build_output_dir = "app/public"
