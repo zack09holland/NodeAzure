@@ -11,7 +11,7 @@ if %errorlevel% geq 8 (
 )
 
 echo Deploying to Cloudflare Workers...
-npx wrangler deploy --assets .deploy-tmp
+npx wrangler deploy
 if %errorlevel% neq 0 (
   echo ERROR: Deploy failed
   rmdir /s /q .deploy-tmp
