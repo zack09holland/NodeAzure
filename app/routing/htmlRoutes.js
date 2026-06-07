@@ -9,9 +9,6 @@ dotenv.config();
 // ===============================================================================
 // ROUTING
 // ===============================================================================
-module.exports = {
-  masterKey: process.env.API_KEY,
-};
 module.exports = function(app) {
   
   // HTML GET Requests
@@ -30,6 +27,6 @@ module.exports = function(app) {
   app.get('/', function(req, res) {
     console.log(res)
     res.render('index.html');
-});
+  });
 
 };
